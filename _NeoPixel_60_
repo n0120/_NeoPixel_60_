@@ -2,7 +2,7 @@
 
 //接続先のSSIDとパスワード
 const char ssid[] = "GL-MT1300-768";
-const char passwd[] = "goodlife";
+const char passwd[] = "********"; # パスワードは隠しています
 
 float num = 0.0;
 WiFiServer server(80);
