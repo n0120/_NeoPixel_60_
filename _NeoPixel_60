@@ -1,12 +1,10 @@
 #include <WiFi.h>
 
 //接続先のSSIDとパスワード
-const char ssid[] = "******";
-const char passwd[] = "******";
+const char ssid[] = "*********";
+const char passwd[] = "*********";
 
-const int ledPin = 16; //赤色LED
-const int bluePin = 4; //青色LED
-float num = 0.0;
+int num = 0;
 WiFiServer server(80);
 
 #include <Adafruit_NeoPixel.h>
@@ -23,7 +21,6 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 void setup() {
   delay(1000);
   Serial.begin(115200);
-  pinMode(ledPin, OUTPUT);// set the LED pin mode
   //wifi接続シーケンス
   WiFi.begin(ssid, passwd);
   Serial.print("WiFi connecting...");
@@ -35,9 +32,6 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   server.begin();
-
-  ledcSetup(0, 12800, 8);
-  ledcAttachPin(bluePin, 0);
 
 #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
   clock_prescale_set(clock_div_1);
@@ -53,7 +47,6 @@ void loop() {
   WiFiClient client = server.available();
 
   if (client) {
-
     Serial.println("new client");
     String currentLine = "";
     while (client.connected()) {
@@ -94,48 +87,20 @@ void loop() {
           currentLine += c;
         }
 
-        while (currentLine.endsWith("GET /?pwm=0")) {
-          colorWipe(strip.Color(127, 127, 127), 50); // white
-          colorWipe(strip.Color(255,   0,   0), 50); // Red
-          //  colorWipe(strip.Color(  0, 255,   0), 50); // Green
-          //  colorWipe(strip.Color(  0,   0, 255), 50); // Blue
-
-          theaterChase(strip.Color(127, 127, 127), 50); // White, half brightness
-          theaterChase(strip.Color(127,   0,   0), 50); // Red, half brightness
-          //  theaterChase(strip.Color(  0,   0, 127), 50); // Blue, half brightness
-
-          rainbow(10);             // Flowing rainbow cycle along the whole strip
-          theaterChaseRainbow(50); // Rainbow-enhanced theaterChase variant
-
-          if (currentLine.endsWith("GET /?pwm=25")) {
-            rainbow(10);             // Flowing rainbow cycle along the whole strip
-          }
-          if (currentLine.endsWith("GET /?pwm=50")) {
-            theaterChaseRainbow(50); // Rainbow-enhanced theaterChase variant
-          }
-          if (currentLine.endsWith("GET /?pwm=75")) {
-            colorWipe(strip.Color(127, 127, 127), 50); // white
-            colorWipe(strip.Color(255,   0,   0), 50); // Red
-          }
-          if (currentLine.endsWith("GET /?pwm=100")) {
-            theaterChase(strip.Color(127, 127, 127), 50); // White, half brightness
-            theaterChase(strip.Color(127,   0,   0), 50); // Red, half brightness
-          }
-
-          while (currentLine.endsWith("GET /?pwm=25")) {
-            rainbow(10);
-          }
-          while (currentLine.endsWith("GET /?pwm=50")) {
-            theaterChaseRainbow(50);
-          }
-          while (currentLine.endsWith("GET /?pwm=75")) {
-            colorWipe(strip.Color(127, 127, 127), 50); // white
-            colorWipe(strip.Color(255,   0,   0), 50); // Red
-          }
-          while (currentLine.endsWith("GET /?pwm=100")) {
-            theaterChase(strip.Color(127, 127, 127), 50); // White, half brightness
-            theaterChase(strip.Color(127,   0,   0), 50); // Red, half brightness;
-          }
+        if (currentLine.endsWith("GET /?pwm=0")) {
+          num = 0;
+        }
+        if (currentLine.endsWith("GET /?pwm=25")) {
+          num = 25;
+        }
+        if (currentLine.endsWith("GET /?pwm=50")) {
+          num = 50;
+        }
+        if (currentLine.endsWith("GET /?pwm=75")) {
+          num = 75;
+        }
+        if (currentLine.endsWith("GET /?pwm=100")) {
+          num = 100;
         }
       }
     }
@@ -143,6 +108,32 @@ void loop() {
     client.stop();
     Serial.println("client disonnected");
     Serial.print(num);
+    Serial.print("\n");
+  }
+  if (num == 0) {
+    colorWipe(strip.Color(127, 127, 127), 50); // white
+    colorWipe(strip.Color(255,   0,   0), 50); // Red
+    //  colorWipe(strip.Color(  0, 255,   0), 50); // Green
+    //  colorWipe(strip.Color(  0,   0, 255), 50); // Blue
+    theaterChase(strip.Color(127, 127, 127), 50); // White, half brightness
+    theaterChase(strip.Color(127,   0,   0), 50); // Red, half brightness
+    //  theaterChase(strip.Color(  0,   0, 127), 50); // Blue, half brightness
+    rainbow(10);             // Flowing rainbow cycle along the whole strip
+    theaterChaseRainbow(50); // Rainbow-enhanced theaterChase variant
+  }
+  if (num == 25) {
+    rainbow(10);             // Flowing rainbow cycle along the whole strip
+  }
+  if (num == 50) {
+    theaterChaseRainbow(50); // Rainbow-enhanced theaterChase variant
+  }
+  if (num == 75) {
+    colorWipe(strip.Color(127, 127, 127), 50); // white
+    colorWipe(strip.Color(255,   0,   0), 50); // Red
+  }
+  if (num == 100) {
+    theaterChase(strip.Color(127, 127, 127), 50); // White, half brightness
+    theaterChase(strip.Color(127,   0,   0), 50); // Red, half brightness
   }
 }
 
